@@ -9,6 +9,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   initPhysicsCanvas();
   initHeaderAndNav();
+  initSpaNavigation();
   initScrollSpy();
   initScrollAnimations();
   initTerminalEasterEgg();
@@ -192,9 +193,172 @@ function initHeaderAndNav() {
 }
 
 /**
- * 3. SCROLLSPY DINÁMICO
+ * 2.5 NAVEGACIÓN MODO SPA (VISTA POR SECCIÓN BAJO DEMANDA)
+ * Al ingresar a la página solo carga la sección de Inicio (#hero).
+ * Para ver cualquier otra sección, el usuario navega desde el menú o botones internos.
+ */
+function initSpaNavigation() {
+  const mainContent = document.getElementById('main-content');
+  const allSections = document.querySelectorAll('main#main-content > section.section');
+  if (!mainContent || !allSections.length) return;
+
+  // Activar modo SPA en el body
+  document.body.classList.add('spa-mode');
+
+  // Orden y nombres amigables de las secciones principales del menú
+  const sectionOrder = [
+    { id: 'hero', label: 'Inicio' },
+    { id: 'about', label: 'Sobre mí' },
+    { id: 'education', label: 'Formación' },
+    { id: 'experience', label: 'Experiencia' },
+    { id: 'research', label: 'Investigación' },
+    { id: 'ai-computing', label: 'Tecnología & IA' },
+    { id: 'student-innovation', label: 'Comunidad' },
+    { id: 'personal-lab', label: 'Personal Lab' },
+    { id: 'cv-section', label: 'CV' },
+    { id: 'contact', label: 'Contacto' }
+  ];
+
+  // Crear barra inferior de navegación entre secciones (pager opcional de apoyo al menú superior)
+  let pagerContainer = document.getElementById('spa-pager');
+  if (!pagerContainer) {
+    pagerContainer = document.createElement('div');
+    pagerContainer.id = 'spa-pager';
+    pagerContainer.className = 'container spa-pager-container';
+    mainContent.appendChild(pagerContainer);
+  }
+
+  function renderPager(activeId) {
+    const normalizedId = activeId === 'philosophy' ? 'about' : activeId;
+    const currentIndex = sectionOrder.findIndex((item) => item.id === normalizedId);
+    if (currentIndex === -1) {
+      pagerContainer.innerHTML = '';
+      return;
+    }
+
+    const prevItem = currentIndex > 0 ? sectionOrder[currentIndex - 1] : null;
+    const nextItem = currentIndex < sectionOrder.length - 1 ? sectionOrder[currentIndex + 1] : null;
+
+    const prevHtml = prevItem
+      ? `<a href="#${prevItem.id}" class="spa-pager-btn" data-spa-target="${prevItem.id}">
+          <span class="spa-pager-label">← Sección anterior</span>
+          <span class="spa-pager-title">${prevItem.label}</span>
+        </a>`
+      : `<span class="spa-pager-hint">Usa el menú superior para ir a cualquier sección</span>`;
+
+    const nextHtml = nextItem
+      ? `<a href="#${nextItem.id}" class="spa-pager-btn next" data-spa-target="${nextItem.id}">
+          <span class="spa-pager-label">Siguiente sección →</span>
+          <span class="spa-pager-title">${nextItem.label}</span>
+        </a>`
+      : `<a href="#hero" class="spa-pager-btn next" data-spa-target="hero">
+          <span class="spa-pager-label">Volver al inicio ↺</span>
+          <span class="spa-pager-title">Inicio</span>
+        </a>`;
+
+    pagerContainer.innerHTML = `
+      <div class="spa-pager-bar" aria-label="Navegación entre secciones">
+        ${prevHtml}
+        <span class="spa-pager-hint">Sección ${currentIndex + 1} de ${sectionOrder.length} · ${sectionOrder[currentIndex].label}</span>
+        ${nextHtml}
+      </div>
+    `;
+  }
+
+  function showSection(sectionId, updateHistory = true) {
+    const normalizedId = sectionId === 'philosophy' ? 'about' : sectionId;
+    const targetEl = document.getElementById(normalizedId);
+    if (!targetEl) return;
+
+    // 1. Ocultar todas las secciones
+    allSections.forEach((sec) => {
+      sec.classList.remove('spa-active', 'spa-subview');
+    });
+
+    // 2. Mostrar la sección seleccionada
+    targetEl.classList.add('spa-active');
+
+    // Si es "Sobre mí" (#about), incluir también el bloque complementario #philosophy
+    const activeElements = [targetEl];
+    if (normalizedId === 'about') {
+      const philosophySec = document.getElementById('philosophy');
+      if (philosophySec) {
+        philosophySec.classList.add('spa-active', 'spa-subview');
+        activeElements.push(philosophySec);
+      }
+    }
+
+    // 3. Activar inmediatamente las animaciones de aparición dentro de la sección activa
+    activeElements.forEach((sec) => {
+      const revealItems = sec.querySelectorAll('.reveal-on-scroll');
+      revealItems.forEach((el) => el.classList.add('is-revealed'));
+    });
+
+    // 4. Actualizar estado activo en enlaces del menú de escritorio y móvil
+    const allNavLinks = document.querySelectorAll('.nav-desktop .nav-link, .mobile-nav-link');
+    allNavLinks.forEach((link) => {
+      const href = link.getAttribute('href');
+      if (href === `#${normalizedId}`) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+
+    // 5. Actualizar el paginador inferior
+    renderPager(normalizedId);
+
+    // 6. Llevar el scroll suavemente a la parte superior de la vista
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 7. Actualizar el historial si aplica
+    if (updateHistory && window.history && window.history.pushState) {
+      const newUrl = normalizedId === 'hero'
+        ? window.location.pathname + window.location.search
+        : `#${normalizedId}`;
+      window.history.pushState({ section: normalizedId }, '', newUrl);
+    }
+  }
+
+  // Interceptar clics en todos los enlaces internos que apunten a una sección (#...)
+  document.addEventListener('click', (e) => {
+    const anchor = e.target.closest('a[href^="#"]');
+    if (!anchor) return;
+
+    const href = anchor.getAttribute('href');
+    if (!href || href === '#' || href === '#main-content') return;
+
+    const targetId = href.slice(1);
+    const targetSection = document.getElementById(targetId);
+    if (targetSection && targetSection.classList.contains('section')) {
+      e.preventDefault();
+      showSection(targetId, true);
+    }
+  });
+
+  // Soportar botones Atrás / Adelante del navegador
+  window.addEventListener('popstate', (e) => {
+    const stateSection = e.state && e.state.section;
+    if (stateSection && document.getElementById(stateSection)) {
+      showSection(stateSection, false);
+    } else {
+      const hashId = window.location.hash ? window.location.hash.slice(1) : 'hero';
+      showSection(document.getElementById(hashId) ? hashId : 'hero', false);
+    }
+  });
+
+  // Al ingresar a la página, cargar exclusivamente la sección de Inicio (#hero)
+  showSection('hero', false);
+  if (window.history && window.history.replaceState) {
+    window.history.replaceState({ section: 'hero' }, '', window.location.pathname + window.location.search);
+  }
+}
+
+/**
+ * 3. SCROLLSPY DINÁMICO (Respaldo cuando no está en modo SPA)
  */
 function initScrollSpy() {
+  if (document.body.classList.contains('spa-mode')) return;
   const sections = document.querySelectorAll('section[id]');
   const navLinks = document.querySelectorAll('.nav-desktop .nav-link');
 
