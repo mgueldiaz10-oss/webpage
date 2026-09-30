@@ -2470,3 +2470,131 @@ code {
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================================================
+   MODO SPA: NAVEGACIÓN POR SECCIONES INDIVIDUALES (VIEW SWITCHER)
+   Muestra únicamente Inicio al entrar y cambia de vista al hacer clic en el menú
+   ========================================================================== */
+body.spa-mode {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+body.spa-mode #main-content {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+body.spa-mode #main-content > .section {
+  display: none !important;
+}
+
+body.spa-mode #main-content > .section.spa-active {
+  display: block !important;
+  padding-top: calc(var(--header-height) + 2.75rem);
+  padding-bottom: 3.5rem;
+  animation: spaSectionEnter 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+body.spa-mode #main-content > .hero-section.spa-active {
+  display: flex !important;
+  padding-top: calc(var(--header-height) + 2rem);
+}
+
+/* Cuando Filosofía Científica acompaña a Sobre mí, reducimos su padding superior */
+body.spa-mode #main-content > #about.spa-active + #philosophy.spa-active,
+body.spa-mode #main-content > #philosophy.spa-active.spa-subview {
+  padding-top: 1.5rem;
+}
+
+@keyframes spaSectionEnter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Barra inferior de cambio rápido entre secciones (Opcional / Complemento UX) */
+.spa-pager-container {
+  margin-top: auto;
+  padding: 0 0 3rem;
+}
+
+.spa-pager-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.35rem;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid var(--border-subtle);
+}
+
+.spa-pager-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-card);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.spa-pager-btn:hover {
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  background: rgba(56, 189, 248, 0.12);
+  transform: translateY(-2px);
+}
+
+.spa-pager-btn.spa-pager-next {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.35);
+  color: var(--accent-cyan);
+}
+
+.spa-pager-indicator {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.mobile-nav-link.active {
+  color: var(--accent-cyan);
+  background: rgba(56, 189, 248, 0.14);
+  border-color: rgba(56, 189, 248, 0.45);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  body.spa-mode #main-content > .section.spa-active {
+    padding-top: calc(var(--header-height) + 1.35rem);
+    padding-bottom: 2.25rem;
+  }
+
+  .spa-pager-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.9rem;
+    gap: 0.65rem;
+  }
+
+  .spa-pager-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
