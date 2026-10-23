@@ -1182,72 +1182,174 @@
           </p>
         </div>
 
-        <!-- DESTACADO DE PERSONAL LAB: ARC REACTOR -->
-        <div class="arc-reactor-showcase card-glass reveal-on-scroll">
-          <div class="arc-showcase-grid">
-            <!-- Visual del Reactor (Preparado para foto real + representación interactiva NeoPixel 16 LEDs) -->
-            <div class="arc-visual-box">
-              <img
-                src="./assets/projects/arc-reactor.jpg"
-                alt="Prototipo ARC Reactor construido con Arduino y NeoPixel"
-                class="arc-photo"
-                onload="this.parentElement.classList.add('has-photo')"
-                onerror="this.style.display='none'"
-              />
-              <!-- Representación interactiva SVG de Anillo NeoPixel de 16 LEDs -->
-              <div class="neopixel-ring-visual" id="neopixel-demo" title="Haz clic para cambiar el modo de iluminación del anillo NeoPixel de 16 LEDs">
-                <div class="neopixel-core">
-                  <span class="core-label font-mono">16x LED</span>
-                  <span class="core-sub">NeoPixel Ring</span>
-                </div>
-              </div>
-              <span class="arc-visual-caption font-mono">Prototipo real con anillo NeoPixel de 16 LEDs direccionables (Haz clic en el reactor para probar efectos PWM)</span>
-            </div>
+        <!-- DESTACADOS DE PERSONAL LAB: COLECCIÓN DUAL DE REACTORES ARC -->
+        <div class="arc-reactors-dual-grid">
 
-            <!-- Información del Proyecto / Producto Experimental -->
-            <div class="arc-info-box">
-              <div class="flex-gap-sm mb-3">
+          <!-- ================= TARJETA 1: ARC REACTOR CIRCULAR (MARK I / II) ================= -->
+          <div class="arc-reactor-card card-glass reveal-on-scroll" id="card-arc-circular">
+            <div class="arc-card-header">
+              <div class="flex-gap-sm mb-2">
                 <span class="status-pill status-green">🟢 PROTOTIPO CONSTRUIDO</span>
                 <span class="commercial-badge">⚡ Disponible bajo solicitud</span>
               </div>
+              <h3 class="arc-card-title">ARC Reactor Mark I / II &mdash; Classic Circular Core</h3>
+              <p class="arc-card-subtitle font-mono text-cyan">Arquitectura de Paladio · Control PWM con Potenciómetro</p>
+            </div>
 
-              <h3 class="arc-title">ARC Reactor &mdash; Hand-built Experimental Device</h3>
-              <p class="text-secondary leading-relaxed mt-3">
-                Proyecto de electrónica y prototipado físico que integra microcontroladores <strong>Arduino</strong>, un anillo <strong>NeoPixel de 16 LEDs RGB direccionables</strong>, diseño estructural, fabricación de carcasa y soldadura/ensamble manual.
+            <!-- Visual Interactivo del Reactor Circular -->
+            <div class="arc-visual-box arc-visual-circular">
+              <div class="neopixel-ring-visual" id="circular-reactor-demo" role="button" tabindex="0" title="Haz clic para cambiar el modo de iluminación del reactor circular">
+                <!-- Capa de bobinas perimetrales de cobre (10 inductores) -->
+                <div class="arc-coils-layer" id="circular-coils" aria-hidden="true"></div>
+
+                <!-- Núcleo central de Paladio -->
+                <div class="neopixel-core circular-core">
+                  <span class="core-tag font-mono">Pd-106</span>
+                  <span class="core-label font-mono">MARK I</span>
+                  <span class="core-sub">Arc Core</span>
+                </div>
+              </div>
+
+              <!-- Indicador de modo en tiempo real -->
+              <div class="arc-mode-display font-mono" id="circular-mode-badge">
+                <span class="indicator-dot dot-cyan"></span>
+                <span class="mode-text">Modo: Pulso Sinusoidal (Latido)</span>
+              </div>
+
+              <span class="arc-visual-caption font-mono">
+                Anillo de 24 LEDs direccionables + Arduino Nano + Potenciómetro analógico (A0) + Botón selector (D2).
+              </span>
+            </div>
+
+            <div class="arc-card-body">
+              <p class="text-secondary leading-relaxed">
+                Dispositivo físico experimental inspirado en el primer reactor de Tony Stark. Integra un anillo <strong>NeoPixel de 24 LEDs</strong> (o 16 LEDs) en bus digital con filtrado antirrebote de pulsador, modulación sinusoidal no bloqueante para respiración suave y barrido rotatorio con estela luminosa.
               </p>
 
-              <!-- Cadena de valor del prototipo -->
-              <div class="proto-pipeline mt-4">
-                <span class="proto-step">Prototipado</span>
+              <!-- Cadena de valor / Proceso -->
+              <div class="proto-pipeline mt-3">
+                <span class="proto-step">Arduino Nano</span>
                 <span class="proto-sep">&rarr;</span>
-                <span class="proto-step">Electrónica</span>
+                <span class="proto-step">24x NeoPixels</span>
                 <span class="proto-sep">&rarr;</span>
-                <span class="proto-step">Diseño</span>
+                <span class="proto-step">PWM Potenciómetro</span>
                 <span class="proto-sep">&rarr;</span>
-                <span class="proto-step">Fabricación</span>
+                <span class="proto-step">Diseño Carcasa</span>
                 <span class="proto-sep">&rarr;</span>
-                <span class="proto-step proto-step-active">Producto</span>
+                <span class="proto-step proto-step-active">Ensamble Real</span>
               </div>
 
-              <div class="project-tags mt-4">
-                <span class="tech-tag">Arduino</span>
-                <span class="tech-tag">NeoPixel 16-LED Ring</span>
-                <span class="tech-tag">Electrónica &amp; Soldadura</span>
-                <span class="tech-tag">Diseño de Carcasa</span>
-                <span class="tech-tag">Hecho a Mano</span>
+              <!-- Tags técnicos -->
+              <div class="project-tags mt-3">
+                <span class="tech-tag">Arduino Nano</span>
+                <span class="tech-tag">Adafruit NeoPixel</span>
+                <span class="tech-tag">Potenciómetro PWM</span>
+                <span class="tech-tag">Respiración Sinusoidal</span>
+                <span class="tech-tag">Barrido Rotatorio</span>
               </div>
 
-              <div class="arc-actions mt-6">
-                <a href="#contact" class="btn btn-primary" data-prefill-subject="Consulta de disponibilidad: ARC Reactor (Hand-built device)">
-                  <span>Consultar disponibilidad</span>
+              <!-- Acciones interactivas -->
+              <div class="arc-actions mt-4">
+                <button type="button" id="btn-toggle-circular-mode" class="btn btn-secondary btn-sm" title="Alternar entre Brillo Fijo, Pulso de Energía y Barrido Rotatorio">
+                  <span>Cambiar animación 💡</span>
+                </button>
+                <button type="button" id="btn-speed-circular" class="btn btn-outline-glow btn-sm" title="Simula el giro del potenciómetro en pin analógico A0">
+                  <span>Potenciómetro: <strong id="speed-circular-val">Rápido</strong></span>
+                </button>
+                <a href="#contact" class="btn btn-primary btn-sm" data-prefill-subject="Consulta de disponibilidad: ARC Reactor Circular (Mark I/II)">
+                  <span>Solicitar réplica</span>
                   <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </a>
-                <button type="button" id="btn-toggle-reactor-mode" class="btn btn-secondary">
-                  <span>Cambiar patrón LED 💡</span>
-                </button>
               </div>
             </div>
           </div>
+
+          <!-- ================= TARJETA 2: ARC REACTOR TRIANGULAR (MARK IV / VI - IRON MAN 2) ================= -->
+          <div class="arc-reactor-card card-glass reveal-on-scroll delay-100" id="card-arc-triangular">
+            <div class="arc-card-header">
+              <div class="flex-gap-sm mb-2">
+                <span class="status-pill status-blue">🔵 NUEVO ELEMENTO (IRON MAN 2)</span>
+                <span class="commercial-badge">⚡ Diseño 33 NeoPixels</span>
+              </div>
+              <h3 class="arc-card-title">ARC Reactor Mark IV / VI &mdash; Triangular Prism Core</h3>
+              <p class="arc-card-subtitle font-mono text-cyan">Síntesis de Nuevo Elemento · Arquitectura Daisy-Chain en 3 Capas</p>
+            </div>
+
+            <!-- Visual Interactivo del Reactor Triangular -->
+            <div class="arc-visual-box arc-visual-triangular">
+              <div class="triangular-reactor-visual" id="triangular-reactor-demo" role="button" tabindex="0" title="Haz clic para activar la secuencia de ignición en 3 ondas o ciclar modos">
+                <!-- Marco triangular metálico de fondo -->
+                <div class="triangular-chassis" aria-hidden="true">
+                  <div class="triangle-frame-outer"></div>
+                  <div class="triangle-frame-inner"></div>
+                </div>
+
+                <!-- Capa 0: 1 LED Central (Singularidad) -->
+                <div class="triangular-core-center" id="tri-led-center" title="LED Central (1 de 33)">
+                  <span class="center-laser-emitter"></span>
+                </div>
+
+                <!-- Capa 1: Contenedor para los 8 LEDs del Prisma Triangular -->
+                <div class="triangle-leds-layer" id="tri-leds-triangle" aria-hidden="true"></div>
+
+                <!-- Capa 2: Contenedor para los 24 LEDs del Aro Exterior -->
+                <div class="triangular-ring-layer" id="tri-leds-ring" aria-hidden="true"></div>
+              </div>
+
+              <!-- Indicador de modo / estado del reactor triangular -->
+              <div class="arc-mode-display font-mono" id="triangular-mode-badge">
+                <span class="indicator-dot dot-blue"></span>
+                <span class="mode-text">Estado: Núcleo Estable (Nuevo Elemento)</span>
+              </div>
+
+              <span class="arc-visual-caption font-mono">
+                Circuito cascada (33 LEDs): 1 Central + 8 Triángulo + 24 Aro Exterior con Arduino y modulación en capas.
+              </span>
+            </div>
+
+            <div class="arc-card-body">
+              <p class="text-secondary leading-relaxed">
+                Evolución de segunda generación de Iron Man 2 inspirada en el colisionador de partículas y la síntesis del nuevo elemento atómico no tóxico. Replica el circuito desarrollado en <strong>Tinkercad y Arduino</strong> con onda expansiva trifásica desde la singularidad central hasta el confinamiento exterior.
+              </p>
+
+              <!-- Cadena de valor / Proceso -->
+              <div class="proto-pipeline mt-3">
+                <span class="proto-step">Arduino UNO/Nano</span>
+                <span class="proto-sep">&rarr;</span>
+                <span class="proto-step">1x Centro</span>
+                <span class="proto-sep">&rarr;</span>
+                <span class="proto-step">8x Triángulo</span>
+                <span class="proto-sep">&rarr;</span>
+                <span class="proto-step">24x Aro Exterior</span>
+                <span class="proto-sep">&rarr;</span>
+                <span class="proto-step proto-step-active">33x Daisy-Chain</span>
+              </div>
+
+              <!-- Tags técnicos -->
+              <div class="project-tags mt-3">
+                <span class="tech-tag">Iron Man 2 Core</span>
+                <span class="tech-tag">33 NeoPixels en Cascada</span>
+                <span class="tech-tag">Simulación Tinkercad</span>
+                <span class="tech-tag">Ignición Trifásica</span>
+                <span class="tech-tag">Electrónica Digital</span>
+              </div>
+
+              <!-- Acciones interactivas -->
+              <div class="arc-actions mt-4">
+                <button type="button" id="btn-trigger-triangular-ignition" class="btn btn-primary btn-sm" title="Ejecuta la animación de arranque con 3 ondas expansivas de centro a aro exterior">
+                  <span>⚡ Ignición (3 ondas)</span>
+                </button>
+                <button type="button" id="btn-toggle-triangular-mode" class="btn btn-secondary btn-sm" title="Cambiar modo de energía (Resonancia, Vórtice de plasma, Unibeam)">
+                  <span>Cambiar modo de energía 🔄</span>
+                </button>
+                <a href="#contact" class="btn btn-outline-glow btn-sm" data-prefill-subject="Consulta de disponibilidad: ARC Reactor Triangular (Mark IV/VI)">
+                  <span>Consultar prototipo</span>
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- OTROS PROYECTOS DE PERSONAL LAB -->
