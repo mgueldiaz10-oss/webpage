@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initScrollSpy();
   initScrollAnimations();
   initTerminalEasterEgg();
-  initNeoPixelRing();
+  initArcReactors();
   initPrefillLinks();
   initCopyEmail();
   initContactForm();
@@ -480,73 +480,474 @@ function initTerminalEasterEgg() {
 }
 
 /**
- * 6. ANILLO INTERACTIVO NEOPIXEL DE 16 LEDs (ARC REACTOR — PERSONAL LAB)
+ * 6. REACTORES ARC INTERACTIVOS (PERSONAL LAB)
+ * Tarjeta 1: Reactor Circular Mark I/II (24 LEDs, Modulación Sinusoidal, Barrido y PWM Potenciómetro)
+ * Tarjeta 2: Reactor Triangular Mark IV/VI - Iron Man 2 (33 LEDs en Cascada, Secuencia de Ignición 3 Ondas)
  */
-function initNeoPixelRing() {
-  const ringContainer = document.getElementById('neopixel-demo');
-  const toggleBtn = document.getElementById('btn-toggle-reactor-mode');
-  if (!ringContainer) return;
+function initArcReactors() {
+  initCircularReactor();
+  initTriangularReactor();
+}
 
-  const LED_COUNT = 16;
-  const radius = 76; // Radio del anillo en px
-  const center = 95; // Mitad de 190px
+/**
+ * 6.1 REACTOR ARC CIRCULAR (MARK I / II - PALADIO)
+ */
+function initCircularReactor() {
+  const container = document.getElementById('circular-reactor-demo');
+  const coilsContainer = document.getElementById('circular-coils');
+  const modeBadge = document.getElementById('circular-mode-badge');
+  const toggleBtn = document.getElementById('btn-toggle-circular-mode');
+  const speedBtn = document.getElementById('btn-speed-circular');
+  const speedValEl = document.getElementById('speed-circular-val');
+  if (!container) return;
+
+  const LED_COUNT = 24;
+  const radius = 80;
+  const center = 100;
   const leds = [];
 
-  // Crear los 16 LEDs físicamente distribuidos en el anillo
+  // 1. Generar 10 bobinas perimetrales de cobre estilo Mark I
+  if (coilsContainer) {
+    coilsContainer.innerHTML = '';
+    const COIL_COUNT = 10;
+    for (let c = 0; c < COIL_COUNT; c++) {
+      const angleDeg = c * (360 / COIL_COUNT);
+      const coil = document.createElement('div');
+      coil.className = 'arc-coil';
+      coil.style.transform = `rotate(${angleDeg}deg)`;
+      coilsContainer.appendChild(coil);
+    }
+  }
+
+  // 2. Generar los 24 LEDs NeoPixel en círculo
   for (let i = 0; i < LED_COUNT; i++) {
     const angle = (i / LED_COUNT) * Math.PI * 2 - Math.PI / 2;
-    const x = center + radius * Math.cos(angle) - 6;
-    const y = center + radius * Math.sin(angle) - 6;
+    const x = center + radius * Math.cos(angle) - 5;
+    const y = center + radius * Math.sin(angle) - 5;
 
     const led = document.createElement('span');
     led.className = 'neopixel-led';
     led.style.left = `${x}px`;
     led.style.top = `${y}px`;
-    ringContainer.appendChild(led);
+    container.appendChild(led);
     leds.push(led);
   }
 
+  // Modos de operación (Fieles al sketch.ino de Arduino)
   const modes = [
-    { name: 'Arc Cyan Core', color: '#38bdf8' },
-    { name: 'Emerald Lab Mode', color: '#10b981' },
-    { name: 'Warm Plasma Amber', color: '#f59e0b' },
-    { name: 'Spectrum RGB', color: 'rainbow' }
+    { id: 'pulse', name: 'Pulso de Energía Sinusoidal (Latido)', dot: 'dot-cyan' },
+    { id: 'sweep', name: 'Barrido Rotatorio (Rotary Sweep)', dot: 'dot-amber' },
+    { id: 'static', name: 'Núcleo Estático Paladio (Core Glow)', dot: 'dot-cyan' },
+    { id: 'spectrum', name: 'Espectro de Plasma RGB', dot: 'dot-blue' }
   ];
 
-  let modeIndex = 0;
-  let tick = 0;
+  let currentModeIndex = 0;
+  let angle = 0;
+  let sweepHead = 0;
+  let animTimer = null;
 
-  function applyMode() {
-    const current = modes[modeIndex];
-    leds.forEach((led, i) => {
-      let c = current.color;
-      if (c === 'rainbow') {
-        const hue = Math.round(((i + tick) / LED_COUNT) * 360) % 360;
-        c = `hsl(${hue}, 90%, 60%)`;
+  // Simulador de Potenciómetro PWM (Lento / Medio / Rápido)
+  const speeds = [
+    { label: 'Rápido', pulseStep: 0.08, sweepDelay: 25 },
+    { label: 'Medio', pulseStep: 0.045, sweepDelay: 45 },
+    { label: 'Lento', pulseStep: 0.025, sweepDelay: 80 }
+  ];
+  let speedIndex = 0;
+
+  function updateBadge() {
+    if (!modeBadge) return;
+    const m = modes[currentModeIndex];
+    modeBadge.innerHTML = `<span class="indicator-dot ${m.dot}"></span><span class="mode-text">Modo: ${m.name}</span>`;
+  }
+
+  function renderFrame() {
+    const mode = modes[currentModeIndex].id;
+    const speed = speeds[speedIndex];
+
+    if (mode === 'pulse') {
+      // Modulación sinusoidal suave (Math.sin entre 0.25 y 1.0)
+      angle += speed.pulseStep;
+      if (angle >= Math.PI * 2) angle -= Math.PI * 2;
+      const intensity = (Math.sin(angle) + 1.0) * 0.38 + 0.24; // 0.24 a 1.0
+      const shadowBlur = Math.round(intensity * 18);
+      const color = `rgba(56, 189, 248, ${intensity})`;
+
+      leds.forEach((led) => {
+        led.style.backgroundColor = color;
+        led.style.boxShadow = `0 0 ${shadowBlur}px #38bdf8, 0 0 ${shadowBlur * 1.5}px rgba(56, 189, 248, 0.7)`;
+        led.style.opacity = `${intensity}`;
+      });
+    } else if (mode === 'sweep') {
+      // Barrido con estela de 8 LEDs desvanecidos progresivamente
+      const tailLength = 8;
+      leds.forEach((led, idx) => {
+        let found = false;
+        for (let t = 0; t < tailLength; t++) {
+          const target = (sweepHead - t + LED_COUNT) % LED_COUNT;
+          if (idx === target) {
+            const ratio = (tailLength - t) / tailLength; // 1.0 a 0.125
+            led.style.backgroundColor = '#38bdf8';
+            led.style.boxShadow = `0 0 ${Math.round(ratio * 16)}px #38bdf8`;
+            led.style.opacity = `${ratio.toFixed(2)}`;
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          led.style.backgroundColor = 'rgba(56, 189, 248, 0.15)';
+          led.style.boxShadow = 'none';
+          led.style.opacity = '0.2';
+        }
+      });
+      sweepHead = (sweepHead + 1) % LED_COUNT;
+    } else if (mode === 'static') {
+      // Núcleo estático brillante y estable
+      leds.forEach((led) => {
+        led.style.backgroundColor = '#38bdf8';
+        led.style.boxShadow = '0 0 10px #38bdf8, 0 0 20px #38bdf8';
+        led.style.opacity = '1';
+      });
+    } else if (mode === 'spectrum') {
+      // Espectro de plasma cromático continuo
+      angle += 0.05;
+      leds.forEach((led, i) => {
+        const hue = Math.round(((i / LED_COUNT) + (angle / (Math.PI * 2))) * 360) % 360;
+        const c = `hsl(${hue}, 92%, 62%)`;
+        led.style.backgroundColor = c;
+        led.style.boxShadow = `0 0 10px ${c}, 0 0 18px ${c}`;
+        led.style.opacity = '1';
+      });
+    }
+  }
+
+  function startAnimation() {
+    if (animTimer) clearInterval(animTimer);
+    const intervalMs = modes[currentModeIndex].id === 'sweep'
+      ? speeds[speedIndex].sweepDelay
+      : 30;
+    animTimer = setInterval(renderFrame, intervalMs);
+  }
+
+  function cycleMode() {
+    currentModeIndex = (currentModeIndex + 1) % modes.length;
+    updateBadge();
+    startAnimation();
+    showToast(`Reactor Circular: ${modes[currentModeIndex].name}`);
+  }
+
+  function cycleSpeed() {
+    speedIndex = (speedIndex + 1) % speeds.length;
+    if (speedValEl) speedValEl.textContent = speeds[speedIndex].label;
+    startAnimation();
+    showToast(`Potenciómetro PWM: Velocidad ${speeds[speedIndex].label}`);
+  }
+
+  container.addEventListener('click', cycleMode);
+  if (toggleBtn) toggleBtn.addEventListener('click', cycleMode);
+  if (speedBtn) speedBtn.addEventListener('click', cycleSpeed);
+
+  updateBadge();
+  startAnimation();
+}
+
+/**
+ * 6.2 REACTOR ARC TRIANGULAR (MARK IV / VI - NUEVO ELEMENTO DE IRON MAN 2)
+ * Arquitectura de 33 NeoPixels en cascada: 1 LED Central + 8 LEDs Triángulo + 24 LEDs Aro Exterior
+ * Incluye la animación programada en Tinkercad con 3 repeticiones de onda expansiva y encendido permanente.
+ */
+function initTriangularReactor() {
+  const container = document.getElementById('triangular-reactor-demo');
+  const centerLed = document.getElementById('tri-led-center');
+  const triangleLayer = document.getElementById('tri-leds-triangle');
+  const ringLayer = document.getElementById('tri-leds-ring');
+  const modeBadge = document.getElementById('triangular-mode-badge');
+  const triggerIgnitionBtn = document.getElementById('btn-trigger-triangular-ignition');
+  const toggleModeBtn = document.getElementById('btn-toggle-triangular-mode');
+  if (!container || !centerLed || !triangleLayer || !ringLayer) return;
+
+  const RING_LED_COUNT = 24;
+  const ringRadius = 86;
+  const centerCoord = 100;
+  const ringLeds = [];
+  const triangleLeds = [];
+
+  // 1. Generar 24 LEDs del Aro Exterior
+  ringLayer.innerHTML = '';
+  for (let i = 0; i < RING_LED_COUNT; i++) {
+    const angle = (i / RING_LED_COUNT) * Math.PI * 2 - Math.PI / 2;
+    const x = centerCoord + ringRadius * Math.cos(angle) - 4;
+    const y = centerCoord + ringRadius * Math.sin(angle) - 4;
+
+    const led = document.createElement('span');
+    led.className = 'tri-ring-led';
+    led.style.left = `${x}px`;
+    led.style.top = `${y}px`;
+    ringLayer.appendChild(led);
+    ringLeds.push(led);
+  }
+
+  // 2. Generar 8 LEDs del Prisma Triangular
+  // Vértices del triángulo equilátero hacia arriba: Top (100, 48), Bottom-Right (145, 126), Bottom-Left (55, 126)
+  triangleLayer.innerHTML = '';
+  const v0 = { x: 100, y: 48 };
+  const v1 = { x: 145, y: 126 };
+  const v2 = { x: 55, y: 126 };
+  const interp = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
+
+  const triPoints = [
+    interp(v0, v1, 0.15),
+    interp(v0, v1, 0.50),
+    interp(v0, v1, 0.85),
+    interp(v1, v2, 0.22),
+    interp(v1, v2, 0.50),
+    interp(v1, v2, 0.78),
+    interp(v2, v0, 0.32),
+    interp(v2, v0, 0.72)
+  ];
+
+  triPoints.forEach((pt) => {
+    const led = document.createElement('span');
+    led.className = 'tri-triangle-led';
+    led.style.left = `${pt.x - 4.5}px`;
+    led.style.top = `${pt.y - 4.5}px`;
+    triangleLayer.appendChild(led);
+    triangleLeds.push(led);
+  });
+
+  // Funciones de control de capas de LEDs
+  function setCenter(on, color = '#38bdf8') {
+    if (on) {
+      centerLed.style.backgroundColor = color;
+      centerLed.style.boxShadow = `0 0 16px ${color}, 0 0 28px ${color}`;
+      centerLed.style.opacity = '1';
+      centerLed.style.transform = 'scale(1.15)';
+    } else {
+      centerLed.style.backgroundColor = 'rgba(56, 189, 248, 0.12)';
+      centerLed.style.boxShadow = 'none';
+      centerLed.style.opacity = '0.2';
+      centerLed.style.transform = 'scale(0.9)';
+    }
+  }
+
+  function setTriangle(on, color = '#38bdf8') {
+    triangleLeds.forEach((led) => {
+      if (on) {
+        led.style.backgroundColor = color;
+        led.style.boxShadow = `0 0 9px ${color}, 0 0 18px ${color}`;
+        led.style.opacity = '1';
+        led.style.transform = 'scale(1.1)';
+      } else {
+        led.style.backgroundColor = 'rgba(56, 189, 248, 0.12)';
+        led.style.boxShadow = 'none';
+        led.style.opacity = '0.18';
+        led.style.transform = 'scale(0.85)';
       }
-      led.style.backgroundColor = c;
-      led.style.boxShadow = `0 0 10px ${c}, 0 0 18px ${c}`;
-      led.style.opacity = ((i + tick) % 4 === 0) ? '0.75' : '1';
     });
   }
 
-  function switchMode() {
-    modeIndex = (modeIndex + 1) % modes.length;
+  function setRing(on, color = '#38bdf8') {
+    ringLeds.forEach((led) => {
+      if (on) {
+        led.style.backgroundColor = color;
+        led.style.boxShadow = `0 0 8px ${color}, 0 0 14px ${color}`;
+        led.style.opacity = '1';
+      } else {
+        led.style.backgroundColor = 'rgba(56, 189, 248, 0.12)';
+        led.style.boxShadow = 'none';
+        led.style.opacity = '0.18';
+      }
+    });
+  }
+
+  function setAll(on, color = '#38bdf8') {
+    setCenter(on, color);
+    setTriangle(on, color);
+    setRing(on, color);
+  }
+
+  // Modos de operación continuo
+  const triModes = [
+    { id: 'stable', name: 'Núcleo Estable (Nuevo Elemento)', dot: 'dot-blue' },
+    { id: 'vortex', name: 'Flujo de Plasma Perimetral (Vórtice)', dot: 'dot-cyan' },
+    { id: 'resonance', name: 'Resonancia Trifásica Continua', dot: 'dot-emerald' },
+    { id: 'unibeam', name: 'Sobrecarga Repulsora (Unibeam Max)', dot: 'dot-amber' }
+  ];
+
+  let currentTriModeIndex = 0;
+  let isIgniting = false;
+  let loopTimer = null;
+  let tick = 0;
+
+  function updateTriBadge(text, dotClass) {
+    if (!modeBadge) return;
+    const dot = dotClass || triModes[currentTriModeIndex].dot;
+    const title = text || `Estado: ${triModes[currentTriModeIndex].name}`;
+    modeBadge.innerHTML = `<span class="indicator-dot ${dot}"></span><span class="mode-text">${title}</span>`;
+  }
+
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  /**
+   * SECUENCIA DE IGNICIÓN (3 ONDAS EXPANSIVAS DE TINKERCAD)
+   * 1. Centro -> Triángulo -> Aro (3 repeticiones)
+   * 2. Encendido final permanente
+   */
+  async function runIgnitionSequence() {
+    if (isIgniting) return;
+    isIgniting = true;
+    if (loopTimer) clearInterval(loopTimer);
+
+    // Apagar todos antes de comenzar
+    setAll(false);
+    updateTriBadge('Iniciando ignición de nuevo elemento...', 'dot-amber');
+
+    for (let ciclo = 1; ciclo <= 3; ciclo++) {
+      updateTriBadge(`Ignición: Onda ${ciclo} de 3 (Centro → Triángulo → Aro)...`, 'dot-amber');
+
+      // 1. Encender desde el centro hacia afuera
+      setCenter(true, '#f0fdf4');
+      await sleep(200);
+
+      setTriangle(true, '#38bdf8');
+      await sleep(200);
+
+      setRing(true, '#38bdf8');
+      await sleep(350); // Pausa con todos encendidos
+
+      // 2. Apagar desde el centro hacia afuera
+      setCenter(false);
+      await sleep(150);
+
+      setTriangle(false);
+      await sleep(150);
+
+      setRing(false);
+      await sleep(300); // Pausa antes de la siguiente onda
+    }
+
+    // 3. Encendido final tras los 3 ciclos: permanecen encendidos permanentemente
+    updateTriBadge('¡Sincronización completa! Encendido definitivo...', 'dot-cyan');
+    setCenter(true, '#ffffff');
+    await sleep(150);
+    setTriangle(true, '#38bdf8');
+    await sleep(150);
+    setRing(true, '#38bdf8');
+
+    isIgniting = false;
+    currentTriModeIndex = 0; // Núcleo Estable
+    updateTriBadge('Estado: Núcleo Estable (Nuevo Elemento Activo)', 'dot-blue');
+    showToast('⚡ ¡Ignición completada! 33 LEDs sincronizados y activos.');
+    startContinuousLoop();
+  }
+
+  function renderTriContinuous() {
+    if (isIgniting) return;
     tick++;
-    applyMode();
-    showToast(`Modo NeoPixel (16 LEDs): ${modes[modeIndex].name}`);
+    const mode = triModes[currentTriModeIndex].id;
+
+    if (mode === 'stable') {
+      // Brillo continuo con sutil vibración de energía del nuevo elemento
+      const pulse = Math.sin(tick * 0.08) * 0.15 + 0.85;
+      setCenter(true, '#f0fdf4');
+      centerLed.style.transform = `scale(${(1.05 + pulse * 0.1).toFixed(2)})`;
+      triangleLeds.forEach((led) => {
+        led.style.backgroundColor = '#38bdf8';
+        led.style.boxShadow = `0 0 ${Math.round(8 * pulse)}px #38bdf8, 0 0 ${Math.round(16 * pulse)}px #38bdf8`;
+        led.style.opacity = `${pulse.toFixed(2)}`;
+      });
+      ringLeds.forEach((led) => {
+        led.style.backgroundColor = '#38bdf8';
+        led.style.boxShadow = '0 0 8px #38bdf8, 0 0 14px #38bdf8';
+        led.style.opacity = '1';
+      });
+    } else if (mode === 'vortex') {
+      // Vórtice perimetral rápido en los 24 LEDs del aro exterior mientras el triángulo palpita
+      const head = tick % RING_LED_COUNT;
+      const tail = 7;
+      ringLeds.forEach((led, idx) => {
+        let isTail = false;
+        for (let t = 0; t < tail; t++) {
+          const target = (head - t + RING_LED_COUNT) % RING_LED_COUNT;
+          if (idx === target) {
+            const ratio = (tail - t) / tail;
+            led.style.backgroundColor = '#38bdf8';
+            led.style.boxShadow = `0 0 ${Math.round(ratio * 15)}px #38bdf8`;
+            led.style.opacity = `${ratio.toFixed(2)}`;
+            isTail = true;
+            break;
+          }
+        }
+        if (!isTail) {
+          led.style.backgroundColor = 'rgba(56, 189, 248, 0.15)';
+          led.style.boxShadow = 'none';
+          led.style.opacity = '0.2';
+        }
+      });
+
+      // Triángulo en pulsación sutil armónica
+      const triGlow = (Math.sin(tick * 0.15) + 1) * 0.35 + 0.3;
+      setTriangle(true, '#38bdf8');
+      triangleLeds.forEach((led) => { led.style.opacity = `${triGlow.toFixed(2)}`; });
+      setCenter(true, '#ffffff');
+    } else if (mode === 'resonance') {
+      // Onda continua de resonancia: Centro -> Triángulo -> Aro
+      const phase = Math.floor((tick / 8) % 3);
+      setCenter(phase === 0, '#ffffff');
+      setTriangle(phase === 1, '#38bdf8');
+      setRing(phase === 2, '#38bdf8');
+    } else if (mode === 'unibeam') {
+      // Sobrecarga repulsora máxima (blanco brillante y halo de gran intensidad)
+      const flash = (Math.sin(tick * 0.2) + 1) * 0.4 + 0.6;
+      setCenter(true, '#ffffff');
+      centerLed.style.transform = `scale(${(1.15 + flash * 0.15).toFixed(2)})`;
+      triangleLeds.forEach((led) => {
+        led.style.backgroundColor = '#e0f2fe';
+        led.style.boxShadow = '0 0 14px #38bdf8, 0 0 25px #ffffff';
+        led.style.opacity = '1';
+      });
+      ringLeds.forEach((led) => {
+        led.style.backgroundColor = '#38bdf8';
+        led.style.boxShadow = '0 0 10px #38bdf8, 0 0 20px #38bdf8';
+        led.style.opacity = '1';
+      });
+    }
   }
 
-  ringContainer.addEventListener('click', switchMode);
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', switchMode);
+  function startContinuousLoop() {
+    if (loopTimer) clearInterval(loopTimer);
+    loopTimer = setInterval(renderTriContinuous, 35);
   }
 
-  // Pulso sutil continuo
-  setInterval(() => {
-    tick = (tick + 1) % LED_COUNT;
-    applyMode();
-  }, 650);
+  function cycleTriMode() {
+    if (isIgniting) return;
+    currentTriModeIndex = (currentTriModeIndex + 1) % triModes.length;
+    updateTriBadge();
+    showToast(`Reactor Triangular: ${triModes[currentTriModeIndex].name}`);
+  }
+
+  container.addEventListener('click', () => {
+    if (isIgniting) return;
+    runIgnitionSequence();
+  });
+
+  if (triggerIgnitionBtn) {
+    triggerIgnitionBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      runIgnitionSequence();
+    });
+  }
+
+  if (toggleModeBtn) {
+    toggleModeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cycleTriMode();
+    });
+  }
+
+  // Iniciar en modo estable con todos los 33 LEDs activos
+  setAll(true);
+  updateTriBadge();
+  startContinuousLoop();
 }
 
 /**
