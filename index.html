@@ -1278,22 +1278,169 @@
             <!-- Visual Interactivo del Reactor Triangular -->
             <div class="arc-visual-box arc-visual-triangular">
               <div class="triangular-reactor-visual" id="triangular-reactor-demo" role="button" tabindex="0" title="Haz clic para activar la secuencia de ignición en 3 ondas o ciclar modos">
-                <!-- Marco triangular metálico de fondo -->
-                <div class="triangular-chassis" aria-hidden="true">
-                  <div class="triangle-frame-outer"></div>
-                  <div class="triangle-frame-inner"></div>
-                </div>
+                <svg viewBox="0 0 240 240" class="triangular-reactor-svg" xmlns="http://www.w3.org/2000/svg" aria-label="Simulador Reactor Arc Triangular Mark VI Iron Man 2">
+                  <defs>
+                    <!-- Filtros de Resplandor Óptico & Bloom -->
+                    <filter id="coreBloom" x="-50%" y="-50%" width="200%" height="200%">
+                      <feGaussianBlur stdDeviation="8" result="blur1" />
+                      <feGaussianBlur stdDeviation="2.5" result="blur2" />
+                      <feMerge>
+                        <feMergeNode in="blur1" />
+                        <feMergeNode in="blur2" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                    <filter id="diffuserGlow" x="-30%" y="-30%" width="160%" height="160%">
+                      <feGaussianBlur stdDeviation="5.5" result="blur" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
 
-                <!-- Capa 0: 1 LED Central (Singularidad) -->
-                <div class="triangular-core-center" id="tri-led-center" title="LED Central (1 de 33)">
-                  <span class="center-laser-emitter"></span>
-                </div>
+                    <!-- Paleta Fiel a Iron Man 2: Cian Eléctrico Láser & Azul Cobalto Profundo -->
+                    <radialGradient id="electricCore" cx="50%" cy="38%" r="62%">
+                      <stop offset="0%" stop-color="#ffffff" />
+                      <stop offset="28%" stop-color="#a5f3fc" />
+                      <stop offset="65%" stop-color="#00e5ff" />
+                      <stop offset="92%" stop-color="#0284c7" />
+                      <stop offset="100%" stop-color="#0369a1" />
+                    </radialGradient>
+                    <radialGradient id="channelGlow" cx="50%" cy="40%" r="65%">
+                      <stop offset="0%" stop-color="#ffffff" />
+                      <stop offset="35%" stop-color="#38bdf8" />
+                      <stop offset="85%" stop-color="#0284c7" />
+                      <stop offset="100%" stop-color="#075985" />
+                    </radialGradient>
+                    <radialGradient id="windowGlowGrad" cx="50%" cy="50%" r="55%">
+                      <stop offset="0%" stop-color="#38bdf8" />
+                      <stop offset="45%" stop-color="#0284c7" />
+                      <stop offset="85%" stop-color="#0369a1" />
+                      <stop offset="100%" stop-color="#082f49" />
+                    </radialGradient>
 
-                <!-- Capa 1: Contenedor para los 8 LEDs del Prisma Triangular -->
-                <div class="triangle-leds-layer" id="tri-leds-triangle" aria-hidden="true"></div>
+                    <!-- Texturas de Chasis Metálico de Titanio/Grafito -->
+                    <linearGradient id="chassisBevel" x1="0" y1="0" x2="240" y2="240" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stop-color="#475569" />
+                      <stop offset="25%" stop-color="#1e293b" />
+                      <stop offset="65%" stop-color="#0f172a" />
+                      <stop offset="100%" stop-color="#1e293b" />
+                    </linearGradient>
+                    <linearGradient id="metalRim" x1="0" y1="0" x2="240" y2="240" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stop-color="#64748b" />
+                      <stop offset="20%" stop-color="#334155" />
+                      <stop offset="50%" stop-color="#0f172a" />
+                      <stop offset="80%" stop-color="#475569" />
+                      <stop offset="100%" stop-color="#1e293b" />
+                    </linearGradient>
+                  </defs>
 
-                <!-- Capa 2: Contenedor para los 24 LEDs del Aro Exterior -->
-                <div class="triangular-ring-layer" id="tri-leds-ring" aria-hidden="true"></div>
+                  <!-- Base de fondo oscura -->
+                  <circle cx="120" cy="120" r="114" fill="#010409" />
+
+                  <!-- 1. CÁMARAS ÓPTICAS DIFUSORAS (BAJO EL CHASIS) -->
+                  <!-- 1.1 Anillo Difusor Exterior (Retroilumina las 9 ventanas perimetrales) -->
+                  <g id="tri-outer-windows-glow" filter="url(#diffuserGlow)">
+                    <circle cx="120" cy="120" r="105" fill="url(#windowGlowGrad)" />
+                  </g>
+
+                  <!-- 2. PLACA METÁLICA CENTRAL (Bloquea la luz entre ventanas exteriores y triángulo) -->
+                  <polygon points="46,58 194,58 120,202" fill="url(#chassisBevel)" stroke="url(#metalRim)" stroke-width="2" stroke-linejoin="round" />
+
+                  <!-- 3. CANAL TRIANGULAR CONCÉNTRICO (Capa 1: 8 LEDs) -->
+                  <g id="tri-channel-glow" filter="url(#diffuserGlow)">
+                    <polygon points="68,76 172,76 120,180" fill="none" stroke="url(#channelGlow)" stroke-width="15" stroke-linejoin="round" />
+                  </g>
+
+                  <!-- Bisel metálico interior (Separa el canal triangular del núcleo central) -->
+                  <polygon points="82,86 158,86 120,162" fill="url(#chassisBevel)" stroke="url(#metalRim)" stroke-width="1.5" stroke-linejoin="round" />
+
+                  <!-- 4. NÚCLEO INVERTIDO CENTRAL (Capa 0: 1 LED Central) -->
+                  <g id="tri-core-glow" filter="url(#coreBloom)">
+                    <polygon points="90,92 150,92 120,152" fill="url(#electricCore)" />
+                    <circle cx="120" cy="116" r="7.5" fill="#ffffff" />
+                  </g>
+
+                  <!-- 5. ESTRUCTURA METÁLICA Y STRUTS (Forman exactamente las 9 ventanas de Iron Man 2) -->
+                  <!-- Aro Biselado Exterior -->
+                  <circle cx="120" cy="120" r="112" fill="none" stroke="url(#metalRim)" stroke-width="13" />
+                  <circle cx="120" cy="120" r="105.5" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1" />
+                  <circle cx="120" cy="120" r="118.5" fill="none" stroke="#020617" stroke-width="2" />
+
+                  <!-- Struts superiores verticales (3 ventanas superiores) -->
+                  <line x1="94" y1="14" x2="94" y2="58" stroke="url(#chassisBevel)" stroke-width="8.5" stroke-linecap="round" />
+                  <line x1="146" y1="14" x2="146" y2="58" stroke="url(#chassisBevel)" stroke-width="8.5" stroke-linecap="round" />
+
+                  <!-- Struts diagonales derechos (3 ventanas derechas) -->
+                  <line x1="192" y1="58" x2="222" y2="72" stroke="url(#chassisBevel)" stroke-width="8.5" stroke-linecap="round" />
+                  <line x1="162" y1="116" x2="224" y2="124" stroke="url(#chassisBevel)" stroke-width="8.5" stroke-linecap="round" />
+                  <line x1="138" y1="164" x2="194" y2="186" stroke="url(#chassisBevel)" stroke-width="8.5" stroke-linecap="round" />
+
+                  <!-- Struts diagonales izquierdos (3 ventanas izquierdas, simetría bilateral) -->
+                  <line x1="48" y1="58" x2="18" y2="72" stroke="url(#chassisBevel)" stroke-width="8.5" stroke-linecap="round" />
+                  <line x1="78" y1="116" x2="16" y2="124" stroke="url(#chassisBevel)" stroke-width="8.5" stroke-linecap="round" />
+                  <line x1="102" y1="164" x2="46" y2="186" stroke="url(#chassisBevel)" stroke-width="8.5" stroke-linecap="round" />
+
+                  <!-- Strut vertical inferior del ápice -->
+                  <line x1="120" y1="200" x2="120" y2="224" stroke="url(#chassisBevel)" stroke-width="8.5" stroke-linecap="round" />
+
+                  <!-- Líneas de bisel y maquinado CNC -->
+                  <polygon points="46,58 194,58 120,202" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1" stroke-linejoin="round" />
+                  <polygon points="82,86 158,86 120,162" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-linejoin="round" />
+                  <polygon points="90,92 150,92 120,152" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="1" stroke-linejoin="round" />
+
+                  <!-- Tornillos/Remaches de precisión en el chasis -->
+                  <g fill="#475569" stroke="#090d16" stroke-width="0.8">
+                    <circle cx="120" cy="9.5" r="2" />
+                    <circle cx="216" cy="65" r="2" />
+                    <circle cx="216" cy="175" r="2" />
+                    <circle cx="120" cy="230.5" r="2" />
+                    <circle cx="24" cy="175" r="2" />
+                    <circle cx="24" cy="65" r="2" />
+                  </g>
+
+                  <!-- 6. PUNTOS LED NEOPIXEL (33 LEDs en cascada del proyecto) -->
+                  <g id="tri-neopixels-layer" opacity="0.88">
+                    <!-- Capa 0: Centro (1 LED) -->
+                    <circle id="led-center-0" class="tri-led-pt" cx="120" cy="116" r="3.5" fill="#ffffff" />
+
+                    <!-- Capa 1: Triángulo (8 LEDs con simetría perfecta) -->
+                    <circle id="led-tri-1" class="tri-led-pt" cx="104" cy="76" r="2.4" fill="#ffffff" />
+                    <circle id="led-tri-2" class="tri-led-pt" cx="136" cy="76" r="2.4" fill="#ffffff" />
+                    <circle id="led-tri-3" class="tri-led-pt" cx="156" cy="94" r="2.4" fill="#ffffff" />
+                    <circle id="led-tri-4" class="tri-led-pt" cx="142" cy="118" r="2.4" fill="#ffffff" />
+                    <circle id="led-tri-5" class="tri-led-pt" cx="128" cy="146" r="2.4" fill="#ffffff" />
+                    <circle id="led-tri-6" class="tri-led-pt" cx="112" cy="146" r="2.4" fill="#ffffff" />
+                    <circle id="led-tri-7" class="tri-led-pt" cx="98" cy="118" r="2.4" fill="#ffffff" />
+                    <circle id="led-tri-8" class="tri-led-pt" cx="84" cy="94" r="2.4" fill="#ffffff" />
+
+                    <!-- Capa 2: Aro Exterior (24 LEDs distribuidos en 360°) -->
+                    <circle id="led-ring-9" class="tri-led-pt" cx="120" cy="26" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-10" class="tri-led-pt" cx="144.3" cy="29.2" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-11" class="tri-led-pt" cx="167" cy="38.6" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-12" class="tri-led-pt" cx="186.5" cy="53.5" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-13" class="tri-led-pt" cx="201.4" cy="73" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-14" class="tri-led-pt" cx="210.8" cy="95.7" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-15" class="tri-led-pt" cx="214" cy="120" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-16" class="tri-led-pt" cx="210.8" cy="144.3" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-17" class="tri-led-pt" cx="201.4" cy="167" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-18" class="tri-led-pt" cx="186.5" cy="186.5" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-19" class="tri-led-pt" cx="167" cy="201.4" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-20" class="tri-led-pt" cx="144.3" cy="210.8" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-21" class="tri-led-pt" cx="120" cy="214" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-22" class="tri-led-pt" cx="95.7" cy="210.8" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-23" class="tri-led-pt" cx="73" cy="201.4" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-24" class="tri-led-pt" cx="53.5" cy="186.5" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-25" class="tri-led-pt" cx="38.6" cy="167" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-26" class="tri-led-pt" cx="29.2" cy="144.3" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-27" class="tri-led-pt" cx="26" cy="120" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-28" class="tri-led-pt" cx="29.2" cy="95.7" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-29" class="tri-led-pt" cx="38.6" cy="73" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-30" class="tri-led-pt" cx="53.5" cy="53.5" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-31" class="tri-led-pt" cx="73" cy="38.6" r="2.2" fill="#bae6fd" />
+                    <circle id="led-ring-32" class="tri-led-pt" cx="95.7" cy="29.2" r="2.2" fill="#bae6fd" />
+                  </g>
+                </svg>
               </div>
 
               <!-- Indicador de modo / estado del reactor triangular -->
