@@ -1828,129 +1828,55 @@ code {
   letter-spacing: 0.04em;
 }
 
-/* --- REACTOR TRIANGULAR (MARK IV / VI - IRON MAN 2) --- */
+/* --- REACTOR TRIANGULAR (MARK IV / VI - IRON MAN 2 PROP) --- */
 .triangular-reactor-visual {
   position: relative;
-  width: 200px;
-  height: 200px;
+  width: 220px;
+  height: 220px;
   border-radius: 50%;
-  border: 2px solid rgba(56, 189, 248, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  box-shadow: 0 0 35px rgba(56, 189, 248, 0.25), inset 0 0 25px rgba(56, 189, 248, 0.18);
+  box-shadow: 0 0 35px rgba(2, 132, 199, 0.35), inset 0 0 25px rgba(2, 132, 199, 0.25);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   user-select: none;
+  background: #020617;
+  overflow: hidden;
 }
 
 .triangular-reactor-visual:hover {
   transform: scale(1.03);
-  box-shadow: 0 0 45px rgba(56, 189, 248, 0.45), inset 0 0 32px rgba(99, 102, 241, 0.35);
+  box-shadow: 0 0 50px rgba(56, 189, 248, 0.55), inset 0 0 35px rgba(56, 189, 248, 0.4);
 }
 
-/* Marco triangular / Prisma de energía */
-.triangular-chassis {
-  position: absolute;
+.triangular-reactor-svg {
   width: 100%;
   height: 100%;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
 }
 
-.triangle-frame-outer {
-  position: absolute;
-  width: 124px;
-  height: 108px;
-  top: 46px;
-  left: 38px;
-  background: rgba(14, 25, 45, 0.65);
-  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
-  border: 2px solid rgba(56, 189, 248, 0.6);
-  filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.4));
+/* Transiciones suaves en las cámaras ópticas y LEDs */
+#tri-outer-windows-glow,
+#tri-channel-glow,
+#tri-core-glow,
+.tri-led-pt {
+  transition: opacity 0.25s ease, filter 0.25s ease, transform 0.25s ease;
 }
 
-.triangle-frame-inner {
-  position: absolute;
-  width: 90px;
-  height: 78px;
-  top: 64px;
-  left: 55px;
-  background: radial-gradient(circle, rgba(6, 14, 28, 0.95) 0%, rgba(2, 6, 14, 0.98) 100%);
-  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
-  border: 1.5px solid rgba(99, 102, 241, 0.55);
+/* Modos de iluminación */
+.tri-layer-off {
+  opacity: 0.08 !important;
+  filter: none !important;
 }
 
-/* Capa 0: Singularidad central (1 LED) */
-.triangular-core-center {
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  top: 98px;
-  left: 88px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #f0fdf4 0%, #38bdf8 50%, rgba(56, 189, 248, 0.2) 100%);
-  box-shadow: 0 0 16px #38bdf8, 0 0 28px #38bdf8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 5;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+.tri-layer-on {
+  opacity: 1 !important;
 }
 
-.center-laser-emitter {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 0 10px #ffffff;
-}
-
-/* Capa 1: LEDs del Triángulo (8 LEDs) */
-.triangle-leds-layer {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 4;
-}
-
-.tri-triangle-led {
-  position: absolute;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #38bdf8;
-  box-shadow: 0 0 8px #38bdf8, 0 0 14px #38bdf8;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
-}
-
-/* Capa 2: LEDs del Aro Exterior (24 LEDs) */
-.triangular-ring-layer {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 3;
-}
-
-.tri-ring-led {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #38bdf8;
-  box-shadow: 0 0 7px #38bdf8, 0 0 12px #38bdf8;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+.tri-layer-dim {
+  opacity: 0.28 !important;
 }
 
 /* Display de modo activo e indicador */
