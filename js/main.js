@@ -653,116 +653,81 @@ function initCircularReactor() {
 /**
  * 6.2 REACTOR ARC TRIANGULAR (MARK IV / VI - NUEVO ELEMENTO DE IRON MAN 2)
  * Arquitectura de 33 NeoPixels en cascada: 1 LED Central + 8 LEDs Triángulo + 24 LEDs Aro Exterior
+ * Con chasis vectorial CNC de titanio y difusores ópticos idénticos al prop real de Iron Man 2.
  * Incluye la animación programada en Tinkercad con 3 repeticiones de onda expansiva y encendido permanente.
  */
 function initTriangularReactor() {
   const container = document.getElementById('triangular-reactor-demo');
-  const centerLed = document.getElementById('tri-led-center');
-  const triangleLayer = document.getElementById('tri-leds-triangle');
-  const ringLayer = document.getElementById('tri-leds-ring');
+  const coreGlow = document.getElementById('tri-core-glow');
+  const channelGlow = document.getElementById('tri-channel-glow');
+  const outerGlow = document.getElementById('tri-outer-windows-glow');
+  const centerLedPt = document.getElementById('led-center-0');
+  const triLedPts = document.querySelectorAll('#tri-neopixels-layer .tri-led-pt[id^="led-tri-"]');
+  const ringLedPts = document.querySelectorAll('#tri-neopixels-layer .tri-led-pt[id^="led-ring-"]');
   const modeBadge = document.getElementById('triangular-mode-badge');
   const triggerIgnitionBtn = document.getElementById('btn-trigger-triangular-ignition');
   const toggleModeBtn = document.getElementById('btn-toggle-triangular-mode');
-  if (!container || !centerLed || !triangleLayer || !ringLayer) return;
 
-  const RING_LED_COUNT = 24;
-  const ringRadius = 86;
-  const centerCoord = 100;
-  const ringLeds = [];
-  const triangleLeds = [];
+  if (!container || !coreGlow || !channelGlow || !outerGlow) return;
 
-  // 1. Generar 24 LEDs del Aro Exterior
-  ringLayer.innerHTML = '';
-  for (let i = 0; i < RING_LED_COUNT; i++) {
-    const angle = (i / RING_LED_COUNT) * Math.PI * 2 - Math.PI / 2;
-    const x = centerCoord + ringRadius * Math.cos(angle) - 4;
-    const y = centerCoord + ringRadius * Math.sin(angle) - 4;
+  const RING_COUNT = 24;
 
-    const led = document.createElement('span');
-    led.className = 'tri-ring-led';
-    led.style.left = `${x}px`;
-    led.style.top = `${y}px`;
-    ringLayer.appendChild(led);
-    ringLeds.push(led);
-  }
-
-  // 2. Generar 8 LEDs del Prisma Triangular
-  // Vértices del triángulo equilátero hacia arriba: Top (100, 48), Bottom-Right (145, 126), Bottom-Left (55, 126)
-  triangleLayer.innerHTML = '';
-  const v0 = { x: 100, y: 48 };
-  const v1 = { x: 145, y: 126 };
-  const v2 = { x: 55, y: 126 };
-  const interp = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
-
-  const triPoints = [
-    interp(v0, v1, 0.15),
-    interp(v0, v1, 0.50),
-    interp(v0, v1, 0.85),
-    interp(v1, v2, 0.22),
-    interp(v1, v2, 0.50),
-    interp(v1, v2, 0.78),
-    interp(v2, v0, 0.32),
-    interp(v2, v0, 0.72)
-  ];
-
-  triPoints.forEach((pt) => {
-    const led = document.createElement('span');
-    led.className = 'tri-triangle-led';
-    led.style.left = `${pt.x - 4.5}px`;
-    led.style.top = `${pt.y - 4.5}px`;
-    triangleLayer.appendChild(led);
-    triangleLeds.push(led);
-  });
-
-  // Funciones de control de capas de LEDs
-  function setCenter(on, color = '#38bdf8') {
+  // Funciones de control de capas de LEDs y difusores
+  function setCenter(on, color = '#ffffff') {
     if (on) {
-      centerLed.style.backgroundColor = color;
-      centerLed.style.boxShadow = `0 0 16px ${color}, 0 0 28px ${color}`;
-      centerLed.style.opacity = '1';
-      centerLed.style.transform = 'scale(1.15)';
+      coreGlow.classList.remove('tri-layer-off');
+      coreGlow.classList.add('tri-layer-on');
+      if (centerLedPt) {
+        centerLedPt.setAttribute('fill', color);
+        centerLedPt.setAttribute('opacity', '1');
+      }
     } else {
-      centerLed.style.backgroundColor = 'rgba(56, 189, 248, 0.12)';
-      centerLed.style.boxShadow = 'none';
-      centerLed.style.opacity = '0.2';
-      centerLed.style.transform = 'scale(0.9)';
+      coreGlow.classList.remove('tri-layer-on');
+      coreGlow.classList.add('tri-layer-off');
+      if (centerLedPt) {
+        centerLedPt.setAttribute('opacity', '0.08');
+      }
     }
   }
 
-  function setTriangle(on, color = '#38bdf8') {
-    triangleLeds.forEach((led) => {
-      if (on) {
-        led.style.backgroundColor = color;
-        led.style.boxShadow = `0 0 9px ${color}, 0 0 18px ${color}`;
-        led.style.opacity = '1';
-        led.style.transform = 'scale(1.1)';
-      } else {
-        led.style.backgroundColor = 'rgba(56, 189, 248, 0.12)';
-        led.style.boxShadow = 'none';
-        led.style.opacity = '0.18';
-        led.style.transform = 'scale(0.85)';
-      }
-    });
+  function setTriangle(on, color = '#bae6fd') {
+    if (on) {
+      channelGlow.classList.remove('tri-layer-off');
+      channelGlow.classList.add('tri-layer-on');
+      triLedPts.forEach((pt) => {
+        pt.setAttribute('fill', color);
+        pt.setAttribute('opacity', '1');
+      });
+    } else {
+      channelGlow.classList.remove('tri-layer-on');
+      channelGlow.classList.add('tri-layer-off');
+      triLedPts.forEach((pt) => {
+        pt.setAttribute('opacity', '0.08');
+      });
+    }
   }
 
-  function setRing(on, color = '#38bdf8') {
-    ringLeds.forEach((led) => {
-      if (on) {
-        led.style.backgroundColor = color;
-        led.style.boxShadow = `0 0 8px ${color}, 0 0 14px ${color}`;
-        led.style.opacity = '1';
-      } else {
-        led.style.backgroundColor = 'rgba(56, 189, 248, 0.12)';
-        led.style.boxShadow = 'none';
-        led.style.opacity = '0.18';
-      }
-    });
+  function setRing(on, color = '#bae6fd') {
+    if (on) {
+      outerGlow.classList.remove('tri-layer-off');
+      outerGlow.classList.add('tri-layer-on');
+      ringLedPts.forEach((pt) => {
+        pt.setAttribute('fill', color);
+        pt.setAttribute('opacity', '1');
+      });
+    } else {
+      outerGlow.classList.remove('tri-layer-on');
+      outerGlow.classList.add('tri-layer-off');
+      ringLedPts.forEach((pt) => {
+        pt.setAttribute('opacity', '0.08');
+      });
+    }
   }
 
-  function setAll(on, color = '#38bdf8') {
-    setCenter(on, color);
-    setTriangle(on, color);
-    setRing(on, color);
+  function setAll(on) {
+    setCenter(on);
+    setTriangle(on);
+    setRing(on);
   }
 
   // Modos de operación continuo
@@ -805,10 +770,10 @@ function initTriangularReactor() {
       updateTriBadge(`Ignición: Onda ${ciclo} de 3 (Centro → Triángulo → Aro)...`, 'dot-amber');
 
       // 1. Encender desde el centro hacia afuera
-      setCenter(true, '#f0fdf4');
+      setCenter(true, '#ffffff');
       await sleep(200);
 
-      setTriangle(true, '#38bdf8');
+      setTriangle(true, '#bae6fd');
       await sleep(200);
 
       setRing(true, '#38bdf8');
@@ -829,7 +794,7 @@ function initTriangularReactor() {
     updateTriBadge('¡Sincronización completa! Encendido definitivo...', 'dot-cyan');
     setCenter(true, '#ffffff');
     await sleep(150);
-    setTriangle(true, '#38bdf8');
+    setTriangle(true, '#bae6fd');
     await sleep(150);
     setRing(true, '#38bdf8');
 
@@ -847,69 +812,47 @@ function initTriangularReactor() {
 
     if (mode === 'stable') {
       // Brillo continuo con sutil vibración de energía del nuevo elemento
-      const pulse = Math.sin(tick * 0.08) * 0.15 + 0.85;
-      setCenter(true, '#f0fdf4');
-      centerLed.style.transform = `scale(${(1.05 + pulse * 0.1).toFixed(2)})`;
-      triangleLeds.forEach((led) => {
-        led.style.backgroundColor = '#38bdf8';
-        led.style.boxShadow = `0 0 ${Math.round(8 * pulse)}px #38bdf8, 0 0 ${Math.round(16 * pulse)}px #38bdf8`;
-        led.style.opacity = `${pulse.toFixed(2)}`;
-      });
-      ringLeds.forEach((led) => {
-        led.style.backgroundColor = '#38bdf8';
-        led.style.boxShadow = '0 0 8px #38bdf8, 0 0 14px #38bdf8';
-        led.style.opacity = '1';
-      });
+      const pulse = Math.sin(tick * 0.08) * 0.12 + 0.88;
+      coreGlow.style.opacity = `${pulse.toFixed(2)}`;
+      channelGlow.style.opacity = `${(pulse * 0.95).toFixed(2)}`;
+      outerGlow.style.opacity = '1';
     } else if (mode === 'vortex') {
-      // Vórtice perimetral rápido en los 24 LEDs del aro exterior mientras el triángulo palpita
-      const head = tick % RING_LED_COUNT;
+      // Vórtice perimetral rápido en los 24 LEDs del aro exterior
+      const head = tick % RING_COUNT;
       const tail = 7;
-      ringLeds.forEach((led, idx) => {
+      ringLedPts.forEach((pt, idx) => {
         let isTail = false;
         for (let t = 0; t < tail; t++) {
-          const target = (head - t + RING_LED_COUNT) % RING_LED_COUNT;
+          const target = (head - t + RING_COUNT) % RING_COUNT;
           if (idx === target) {
             const ratio = (tail - t) / tail;
-            led.style.backgroundColor = '#38bdf8';
-            led.style.boxShadow = `0 0 ${Math.round(ratio * 15)}px #38bdf8`;
-            led.style.opacity = `${ratio.toFixed(2)}`;
+            pt.setAttribute('opacity', `${ratio.toFixed(2)}`);
+            pt.setAttribute('fill', '#ffffff');
             isTail = true;
             break;
           }
         }
         if (!isTail) {
-          led.style.backgroundColor = 'rgba(56, 189, 248, 0.15)';
-          led.style.boxShadow = 'none';
-          led.style.opacity = '0.2';
+          pt.setAttribute('opacity', '0.2');
+          pt.setAttribute('fill', '#38bdf8');
         }
       });
 
-      // Triángulo en pulsación sutil armónica
       const triGlow = (Math.sin(tick * 0.15) + 1) * 0.35 + 0.3;
-      setTriangle(true, '#38bdf8');
-      triangleLeds.forEach((led) => { led.style.opacity = `${triGlow.toFixed(2)}`; });
-      setCenter(true, '#ffffff');
+      channelGlow.style.opacity = `${triGlow.toFixed(2)}`;
+      coreGlow.style.opacity = '1';
     } else if (mode === 'resonance') {
       // Onda continua de resonancia: Centro -> Triángulo -> Aro
       const phase = Math.floor((tick / 8) % 3);
       setCenter(phase === 0, '#ffffff');
-      setTriangle(phase === 1, '#38bdf8');
+      setTriangle(phase === 1, '#bae6fd');
       setRing(phase === 2, '#38bdf8');
     } else if (mode === 'unibeam') {
       // Sobrecarga repulsora máxima (blanco brillante y halo de gran intensidad)
-      const flash = (Math.sin(tick * 0.2) + 1) * 0.4 + 0.6;
-      setCenter(true, '#ffffff');
-      centerLed.style.transform = `scale(${(1.15 + flash * 0.15).toFixed(2)})`;
-      triangleLeds.forEach((led) => {
-        led.style.backgroundColor = '#e0f2fe';
-        led.style.boxShadow = '0 0 14px #38bdf8, 0 0 25px #ffffff';
-        led.style.opacity = '1';
-      });
-      ringLeds.forEach((led) => {
-        led.style.backgroundColor = '#38bdf8';
-        led.style.boxShadow = '0 0 10px #38bdf8, 0 0 20px #38bdf8';
-        led.style.opacity = '1';
-      });
+      const flash = (Math.sin(tick * 0.2) + 1) * 0.35 + 0.65;
+      coreGlow.style.opacity = `${(flash * 1.2).toFixed(2)}`;
+      channelGlow.style.opacity = `${flash.toFixed(2)}`;
+      outerGlow.style.opacity = `${flash.toFixed(2)}`;
     }
   }
 
@@ -921,6 +864,7 @@ function initTriangularReactor() {
   function cycleTriMode() {
     if (isIgniting) return;
     currentTriModeIndex = (currentTriModeIndex + 1) % triModes.length;
+    setAll(true);
     updateTriBadge();
     showToast(`Reactor Triangular: ${triModes[currentTriModeIndex].name}`);
   }
@@ -944,7 +888,7 @@ function initTriangularReactor() {
     });
   }
 
-  // Iniciar en modo estable con todos los 33 LEDs activos
+  // Iniciar en modo estable con todos los 33 LEDs y difusores activos
   setAll(true);
   updateTriBadge();
   startContinuousLoop();
